@@ -32,8 +32,10 @@ def main(_):
     mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 
     x = tf.placeholder(tf.float32, shape=[None, 28*28])
+
     W1 = tf.get_variable("W1", shape=[784, 256], initializer=tf.contrib.layers.xavier_initializer())
     b1 = tf.Variable(tf.zeros([256]))
+
     h1 = tf.nn.relu(tf.matmul(x, W1) + b1)
 
     W2 = tf.get_variable("W2", shape=[256, 10], initializer=tf.contrib.layers.xavier_initializer())
@@ -42,24 +44,28 @@ def main(_):
     y = tf.nn.softmax(tf.matmul(h1, W2) + b2)
 
     y_ = tf.placeholder(tf.float32, shape=[None, 10])
+
     cross_entropy = -tf.reduce_sum(y_*tf.log(y)) # tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
     train_step = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(cross_entropy)
 
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
 
+    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
     # Getting pic from mnist
     # img, lab = mnist.train.next_batch(1)
     # img[0] = img[0] * 255
     # tmp_img = img[0].reshape(28, 28)
     # cv2.imwrite("m.png", tmp_img)
-
-    for _ in range(3000):
+    for _ in range(100):
         batch_xs, batch_ys = mnist.train.next_batch(100)
-        sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
+        _, loss = sess.run([train_step, cross_entropy], feed_dict={x: batch_xs, y_: batch_ys})
 
-    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        train_accuracy = accuracy.eval(feed_dict={x: mnist.test.images, y_: mnist.test.labels})
+        print("Loss {}, Accuracy {}".format(loss, train_accuracy))
+
     print(sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels}))
 
     #Custom Input
