@@ -33,15 +33,10 @@ def main(_):
 
     x = tf.placeholder(tf.float32, shape=[None, 28*28])
 
-    W1 = tf.get_variable("W1", shape=[784, 256], initializer=tf.contrib.layers.xavier_initializer())
-    b1 = tf.Variable(tf.zeros([256]))
+    W = tf.get_variable("W1", shape=[784, 10], initializer=tf.contrib.layers.xavier_initializer())
+    b = tf.Variable(tf.zeros([10]))
 
-    h1 = tf.nn.relu(tf.matmul(x, W1) + b1)
-
-    W2 = tf.get_variable("W2", shape=[256, 10], initializer=tf.contrib.layers.xavier_initializer())
-    b2 = tf.Variable(tf.zeros([10]))
-
-    y = tf.nn.softmax(tf.matmul(h1, W2) + b2)
+    y = tf.nn.softmax(tf.matmul(x, W) + b)
 
     y_ = tf.placeholder(tf.float32, shape=[None, 10])
 
