@@ -31,14 +31,12 @@ def load():
 def main(_):
     mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 
-    x = tf.placeholder(tf.float32, shape=[None, 28*28])
-
-    W = tf.get_variable("W1", shape=[784, 10], initializer=tf.contrib.layers.xavier_initializer())
-    b = tf.Variable(tf.zeros([10]))
-
-    y = tf.nn.softmax(tf.matmul(x, W) + b)
-
+    x = tf.placeholder(tf.float32, shape=[None, 28*28], name="input")
     y_ = tf.placeholder(tf.float32, shape=[None, 10])
+
+    W = tf.get_variable("Weights 1", shape=[784, 10], initializer=tf.contrib.layers.xavier_initializer())
+    b = tf.Variable(tf.zeros([10]), name="biases")
+    y = tf.nn.softmax(tf.matmul(x, W) + b)
 
     cross_entropy = -tf.reduce_sum(y_*tf.log(y)) # tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
     train_step = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(cross_entropy)

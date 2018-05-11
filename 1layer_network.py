@@ -31,19 +31,19 @@ def load():
 def main(_):
     mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 
+    #Image
     x = tf.placeholder(tf.float32, shape=[None, 28*28])
+    y_ = tf.placeholder(tf.float32, shape=[None, 10])
 
+    #First Layer
     W1 = tf.get_variable("W1", shape=[784, 256], initializer=tf.contrib.layers.xavier_initializer())
     b1 = tf.Variable(tf.zeros([256]))
-
     h1 = tf.nn.relu(tf.matmul(x, W1) + b1)
 
+    #Second Layer
     W2 = tf.get_variable("W2", shape=[256, 10], initializer=tf.contrib.layers.xavier_initializer())
     b2 = tf.Variable(tf.zeros([10]))
-
     y = tf.nn.softmax(tf.matmul(h1, W2) + b2)
-
-    y_ = tf.placeholder(tf.float32, shape=[None, 10])
 
     cross_entropy = -tf.reduce_sum(y_*tf.log(y)) # tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
     train_step = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(cross_entropy)
