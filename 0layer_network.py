@@ -34,8 +34,8 @@ def main(_):
     x = tf.placeholder(tf.float32, shape=[None, 28*28], name="input")
     y_ = tf.placeholder(tf.float32, shape=[None, 10])
 
-    W = tf.get_variable("Weights 1", shape=[784, 10], initializer=tf.contrib.layers.xavier_initializer())
-    b = tf.Variable(tf.zeros([10]), name="biases")
+    W = tf.get_variable("W", shape=[784, 10], initializer=tf.contrib.layers.xavier_initializer())
+    b = tf.Variable(tf.zeros([10]), name="b")
     y = tf.nn.softmax(tf.matmul(x, W) + b)
 
     cross_entropy = -tf.reduce_sum(y_*tf.log(y)) # tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
@@ -53,13 +53,19 @@ def main(_):
     # tmp_img = img[0].reshape(28, 28)
     # cv2.imwrite("m.png", tmp_img)
 
-    for _ in range(100):
+    file_loss = open("loss.txt", "w")
+    file_acc = open("accuracy.txt", "w")
+    for _ in range(1000):
         batch_xs, batch_ys = mnist.train.next_batch(100)
         _, loss = sess.run([train_step, cross_entropy], feed_dict={x: batch_xs, y_: batch_ys})
-
         train_accuracy = accuracy.eval(feed_dict={x: mnist.test.images, y_: mnist.test.labels})
-        print("Loss {}, Accuracy {}".format(loss, train_accuracy))
+        #print("Loss {}, Accuracy {}".format(loss, train_accuracy))
 
+        file_loss.write(str(loss) + "\n")
+        file_acc.write(str(train_accuracy) + "\n")
+
+    file_loss.close()
+    file_acc.close()
     print(sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels}))
 
     #Custom Input

@@ -71,17 +71,17 @@ def main(_):
     h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
     #Dropout
-    #keep_prob = tf.placeholder(tf.float32)
-    #h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
+    keep_prob = tf.placeholder(tf.float32)
+    h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
     #Readout Layer
     W_fc2 = weight_variable([256, 10])
     b_fc2 = bias_variable([10])
-    y_conv = tf.nn.softmax(tf.matmul(h_fc1, W_fc2) + b_fc2)
+    y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 
     y_ = tf.placeholder(tf.float32, shape=[None, 10])
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y_conv))
-    train_step = tf.train.AdamOptimizer(learning_rate=0.0005).minimize(cross_entropy)
+    train_step = tf.train.AdamOptimizer(learning_rate=0.0004).minimize(cross_entropy)
 
     correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
@@ -89,18 +89,24 @@ def main(_):
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
 
+    file_loss = open("loss3.txt", "w")
+    file_acc = open("accuracy3.txt", "w")
     for i in range(10000):
         batch_xs, batch_ys = mnist.train.next_batch(50)
-        _, loss = sess.run([train_step, cross_entropy], feed_dict={x: batch_xs, y_: batch_ys})
+        _, loss = sess.run([train_step, cross_entropy], feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.5})
         if i % 100 == 0:
-            train_accuracy = accuracy.eval(feed_dict={x: mnist.test.images, y_: mnist.test.labels})
+            train_accuracy = accuracy.eval(feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0})
             print("Loss {}, Accuracy {}".format(loss, train_accuracy))
+            file_loss.write(str(loss) + "\n")
+            file_acc.write(str(train_accuracy) + "\n")
 
-    print(sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels}))
+    file_loss.close()
+    file_acc.close()
+    print(sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
     #Custom Input
     images, labels = load()
     prediction = tf.argmax(y_conv, 1)
-    print(sess.run(prediction, feed_dict={x: images, y_: labels}))
+    print(sess.run(prediction, feed_dict={x: images, y_: labels, keep_prob: 1.0}))
 
 
 if __name__ == '__main__':

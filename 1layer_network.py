@@ -60,13 +60,19 @@ def main(_):
     # tmp_img = img[0].reshape(28, 28)
     # cv2.imwrite("m.png", tmp_img)
 
-    for _ in range(100):
+    file_loss = open("loss2.txt", "w")
+    file_acc = open("accuracy2.txt", "w")
+    for _ in range(1000):
         batch_xs, batch_ys = mnist.train.next_batch(100)
         _, loss = sess.run([train_step, cross_entropy], feed_dict={x: batch_xs, y_: batch_ys})
-
         train_accuracy = accuracy.eval(feed_dict={x: mnist.test.images, y_: mnist.test.labels})
-        print("Loss {}, Accuracy {}".format(loss, train_accuracy))
+        #print("Loss {}, Accuracy {}".format(loss, train_accuracy))
 
+        file_loss.write(str(loss) + "\n")
+        file_acc.write(str(train_accuracy) + "\n")
+
+    file_loss.close()
+    file_acc.close()
     print(sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels}))
 
     #Custom Input
